@@ -1,13 +1,8 @@
 package com.cleanup.todoc.ui;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,11 +11,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 import com.cleanup.todoc.R;
+import com.cleanup.todoc.database.RoomDatabase;
+import com.cleanup.todoc.database.RoomHelper;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
-
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * List of all current tasks of the application
      */
     @NonNull
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    public ArrayList<Task> tasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
@@ -88,6 +91,10 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private TextView lblNoTasks;
 
+    //TODO : INSTANTIATE THE DB
+    public static RoomDatabase roomDatabase;
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,8 +104,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
 
+        //TODO : BUILD DB
+        roomDatabase = Room.databaseBuilder(getApplicationContext(), RoomDatabase.class, "taskdb").fallbackToDestructiveMigration().build();
+
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
+
+        //TODO : RETRIEVE TASKS
+        new RoomHelper.GetTasksAsync(this).execute();
 
         findViewById(R.id.fab_add_task).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public void onDeleteTask(Task task) {
-        tasks.remove(task);
-        updateTasks();
+        //TODO : CALL ASYNC TASK TO DELETE
+        new RoomHelper.DeleteTaskASync(this).execute(task);
     }
 
     /**
@@ -162,16 +175,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-                long id = (long) (Math.random() * 50000);
 
-
-                Task task = new Task(
-                        id,
-                        taskProject.getId(),
-                        taskName,
-                        new Date().getTime()
-                );
+                Task task = new Task(0, taskProject.getId(), taskName, new Date().getTime());
 
                 addTask(task);
 
@@ -208,14 +213,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
-        tasks.add(task);
-        updateTasks();
+        //TODO : EXECUTE ASYNC TASK TO ADD
+        new RoomHelper.AddASync(this).execute(task);
     }
 
     /**
      * Updates the list of tasks in the UI
      */
-    private void updateTasks() {
+    public void updateTasks() {
         if (tasks.size() == 0) {
             lblNoTasks.setVisibility(View.VISIBLE);
             listTasks.setVisibility(View.GONE);
@@ -320,4 +325,5 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
          */
         NONE
     }
+
 }

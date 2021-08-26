@@ -1,7 +1,10 @@
 package com.cleanup.todoc.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import java.util.Comparator;
 
@@ -10,10 +13,12 @@ import java.util.Comparator;
  *
  * @author Gaëtan HERFRAY
  */
+@Entity(tableName = "task")
 public class Task {
     /**
      * The unique identifier of the task
      */
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
     /**
@@ -26,12 +31,14 @@ public class Task {
      */
     // Suppress warning because setName is called in constructor
     @SuppressWarnings("NullableProblems")
+    @ColumnInfo(name = "task_name")
     @NonNull
     private String name;
 
     /**
      * The timestamp when the task has been created
      */
+    @ColumnInfo(name = "creation_timestamp")
     private long creationTimestamp;
 
     /**
@@ -49,6 +56,14 @@ public class Task {
         this.setCreationTimestamp(creationTimestamp);
     }
 
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
     /**
      * Returns the unique identifier of the task.
      *
@@ -63,7 +78,7 @@ public class Task {
      *
      * @param id the unique idenifier of the task to set
      */
-    private void setId(long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
