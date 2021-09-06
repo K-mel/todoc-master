@@ -12,7 +12,10 @@ android {
     }
     buildTypes {
         release {
+            //Active proguard qui supprime les classes/codes inutilisées
             minifyEnabled true
+            //Supprime toutes les ressources inutilisées (pngs, xmls)
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
